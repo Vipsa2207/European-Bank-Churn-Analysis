@@ -45,7 +45,7 @@ Revenue at Risk from churned customers exceeds $185 million
 
 🚀 How to Run Locally
 bash# 1. Clone the repository
-git clone https://github.com/YOUR-USERNAME/european-bank-churn-analysis.git
+git clone https://github.com/Vipsa2207/european-bank-churn-analysis.git
 
 # 2. Navigate into the folder
 cd european-bank-churn-analysis
