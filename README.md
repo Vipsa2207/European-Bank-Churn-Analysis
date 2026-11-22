@@ -4,7 +4,7 @@
 
 An interactive Streamlit dashboard that finds which bank customers are most likely to leave, and why. It covers 10,000 customers in France, Germany and Spain.
 
-Built during my Data Analyst Internship at Unified Mentor (2026).
+Project 2 of 4 · Built during my Data Analyst Internship at Unified Mentor (Jan–Jul 2026).
 
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-150458?logo=pandas&logoColor=white)
@@ -28,9 +28,10 @@ About 1 in 5 customers left the bank. Which customers leave most, and where shou
 
 Customers who left held **$185.6M in account balances**. That is money they kept at the bank, not revenue the bank earned.
 
-## Churn risk score
+## How it works
 
-A simple, transparent score from 0 to 100:
+1. **Prepare the data:** drop ID columns, then group customers into age, credit, tenure and balance bands. Flag **high-value** customers: the top 25% by balance or by salary.
+2. **Score churn risk** with a simple, transparent points system from 0 to 100:
 
 | Signal | Points |
 |---|---|
@@ -40,19 +41,18 @@ A simple, transparent score from 0 to 100:
 | Zero balance | 10 |
 | Credit score under 500 | 10 |
 
-The weights were set by hand, not fitted to the data. Even so, the score separates customers well:
+   A score of 55+ is High Risk, 30–54 Medium, under 30 Low. The weights were set by hand, not fitted to the data.
+3. **The dashboard** has filters for geography, gender, age group and credit band, plus high-value-only and active-only switches. It has six tabs: churn overview, geographic analysis, demographics, high-value customers, automated insights, and raw data with a CSV download. Every KPI, chart and insight updates with the filters.
+
+## How well it works
+
+The risk score separates customers well, even though nothing was trained:
 
 | Risk tier | Customers | Actually churned |
 |---|---|---|
 | High (55+) | 1,013 | **71.6%** |
 | Medium (30–54) | 4,395 | 16.7% |
 | Low (under 30) | 4,592 | 12.6% |
-
-## What the dashboard shows
-
-- **Filters:** geography, gender, age group, credit band, high-value and active-only toggles
-- **Six tabs:** churn overview, geographic analysis, demographics, high-value customers, automated insights, raw data with CSV download
-- Every KPI, chart and insight updates with the filters.
 
 ## Limitations
 
