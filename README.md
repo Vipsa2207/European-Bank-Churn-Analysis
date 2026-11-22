@@ -80,7 +80,12 @@ streamlit run app.py
 
 ## Research paper
 
-I authored a research paper on this project (JETIR paper ID 583670, accepted, not published). A revised version will be added to this repository.
+I authored a research paper on this project (JETIR paper ID 583670, accepted, not published).
+
+- [Research paper, revised version (PDF)](docs/Research_Paper_Revised.pdf)
+- [Stakeholder summary, revised version (PDF)](docs/Stakeholder_Summary_Revised.pdf)
+
+The revised version (November 2026) corrects labels, figures and references in the version submitted to JETIR.
 
 ## How I built it
 
