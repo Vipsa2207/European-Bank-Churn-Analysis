@@ -1,64 +1,96 @@
-🏦 European Bank — Churn Intelligence Dashboard
-An interactive data analytics web application built with Streamlit and Seaborn, analysing customer churn behaviour across 10,000 European bank customers.
+# European Bank — Customer Churn Intelligence Dashboard
 
-🔗 Live Demo
-👉 Click here to view the live app (replace with your deployment link)
+**Live app:** https://european-bank-churn-analysis-d4su7yebzrqdkcxrolqwpf.streamlit.app/
 
-📌 Project Overview
-This project analyses customer churn patterns in a European bank dataset using exploratory data analysis (EDA), customer segmentation, and interactive visualisations. The goal is to identify high-risk customer segments and provide actionable retention insights.
+An interactive Streamlit dashboard that finds which bank customers are most likely to leave, and why. It covers 10,000 customers in France, Germany and Spain.
 
-📊 Key Features
+Project 2 of 4 · Built during my Data Analyst Internship at Unified Mentor (Jan–Jul 2026).
 
-Interactive Filters — Filter by Geography, Gender, Age Group, and Credit Band
-6 KPI Cards — Real-time metrics including Churn Rate, Retention Rate, Revenue at Risk
-Churn Overview — Distribution analysis and product-based churn rates
-Geographic Analysis — Country-level churn heatmaps and comparisons
-Demographics — Age group, gender, and tenure-based churn breakdown
-High-Value Customer Explorer — Identify and analyse premium segment churn
-Key Insights Tab — Auto-generated analytical insights with risk/opportunity flags
-Churn Risk Score — Composite scoring model to classify customers by risk level
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?logo=pandas&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)
+![Seaborn](https://img.shields.io/badge/Seaborn-4C72B0)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-11557C)
 
+![Dashboard](docs/dashboard.png)
 
-🛠️ Technology Stack
-ToolPurposePythonCore programming languageStreamlitWeb application frameworkSeabornStatistical data visualisationMatplotlibGraph renderingPandasData manipulation and analysisGitHubSource code hostingStreamlit Cloud / VercelLive deployment
+## The business question
 
-📂 Project Structure
-european-bank-churn-analysis/
-│
-├── app.py                        # Main Streamlit application
-├── European_Bank.csv             # Dataset (10,000 customer records)
-├── logo.png                      # European Central Bank logo
-└── README.md                     # Project documentation
+About 1 in 5 customers left the bank. Which customers leave most, and where should a retention team focus first?
 
-📈 Dataset Description
-ColumnDescriptionCreditScoreCustomer's credit scoreGeographyCountry (France, Spain, Germany)GenderMale / FemaleAgeCustomer ageTenureYears with the bankBalanceAccount balanceNumOfProductsNumber of bank products heldHasCrCardHas credit card (0/1)IsActiveMemberActive member status (0/1)EstimatedSalaryEstimated annual salaryExitedChurned (1) or Stayed (0) — Target variable
+## Key findings
 
-🔍 Key Findings
+- **Age matters most.** Customers aged 46–60 churn at **51.1%**, against 7.6% for under-30s. In Germany this group churns at 67.3%.
+- **Germany stands out.** Churn is **32.4%** in Germany, against 16.2% in France and 16.7% in Spain.
+- **Inactive customers leave more.** Inactive members churn at **26.9%**, against 14.3% for active members.
+- **Two products is the sweet spot.** Churn is 27.7% with one product and 7.6% with two. It jumps to 82.7% with three, though only 326 customers hold three or more.
+- **Credit score barely matters.** Churn is between 19.6% and 22.0% in every credit band.
 
-Germany has the highest churn rate at 32.4%, significantly above France (16.2%) and Spain (16.7%)
-Customers aged 46–60 churn at over 51% — the highest of any age group
-Inactive members churn at 26.9% vs 14.3% for active members — a 12.6pp gap
-Customers with 3+ products churn at over 82%, indicating product complexity issues
-Female customers churn at 25.1% vs 16.5% for males
-Revenue at Risk from churned customers exceeds $185 million
+Customers who left held **$185.6M in account balances**. That is money they kept at the bank, not revenue the bank earned.
 
+## How it works
 
-🚀 How to Run Locally
-bash# 1. Clone the repository
-git clone https://github.com/Vipsa2207/european-bank-churn-analysis.git
+1. **Prepare the data:** drop ID columns, then group customers into age, credit, tenure and balance bands. Flag **high-value** customers: the top 25% by balance or by salary.
+2. **Score churn risk** with a simple, transparent points system from 0 to 100:
 
-# 2. Navigate into the folder
-cd european-bank-churn-analysis
+| Signal | Points |
+|---|---|
+| Inactive member | 30 |
+| Age over 45 | 25 |
+| 3 or more products | 25 |
+| Zero balance | 10 |
+| Credit score under 500 | 10 |
 
-# 3. Install dependencies
-pip install streamlit pandas seaborn matplotlib
+   A score of 55+ is High Risk, 30–54 Medium, under 30 Low. The weights were set by hand, not fitted to the data.
+3. **The dashboard** has filters for geography, gender, age group and credit band, plus high-value-only and active-only switches. It has six tabs: churn overview, geographic analysis, demographics, high-value customers, automated insights, and raw data with a CSV download. Every KPI, chart and insight updates with the filters.
 
-# 4. Run the app
+## How well it works
+
+The risk score separates customers well, even though nothing was trained:
+
+| Risk tier | Customers | Actually churned |
+|---|---|---|
+| High (55+) | 1,013 | **71.6%** |
+| Medium (30–54) | 4,395 | 16.7% |
+| Low (under 30) | 4,592 | 12.6% |
+
+## Limitations
+
+- **Sample data.** This appears to be a widely used public banking dataset, provided for the internship. It is not a real bank's records.
+- **One snapshot in time.** There is no history, so the dashboard shows who left, not when or what triggered it.
+- **The zero-balance signal points the wrong way.** Zero-balance customers churn *less* (13.8%) than average. Removing that signal would slightly improve the score.
+- **Correlation, not cause.** The findings show which groups leave more, not why.
+
+## Run it locally
+
+```bash
+git clone https://github.com/Vipsa2207/European-Bank-Churn-Analysis.git
+cd European-Bank-Churn-Analysis
+pip install -r requirements.txt
 streamlit run app.py
+```
 
-👩‍💻 Built By
-Vipsa — Web Development Intern
-Built as part of internship project requirements.
+## Project files
 
-📄 License
-This project is for educational purposes only.
+| File | What it is |
+|---|---|
+| `app.py` | The Streamlit dashboard |
+| `European_Bank.csv` | 10,000 customer records |
+| `requirements.txt` | Pinned library versions |
+
+## Research paper
+
+I authored a research paper on this project (JETIR paper ID 583670, accepted, not published).
+
+- [Research paper, revised version (PDF)](docs/Research_Paper_Revised.pdf)
+- [Stakeholder summary, revised version (PDF)](docs/Stakeholder_Summary_Revised.pdf)
+
+The revised version (November 2026) corrects labels, figures and references in the version submitted to JETIR.
+
+## How I built it
+
+I used AI to help write the Python code. I framed the business question, checked every figure against the data, and wrote the findings.
+
+## Author
+
+**Vipsa Patel** — Data Analyst Intern, Unified Mentor · [LinkedIn](https://www.linkedin.com/in/vipsapatel)

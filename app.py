@@ -3,27 +3,17 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-import warnings, base64, os
+import warnings
 import streamlit.components.v1 as components
 warnings.filterwarnings('ignore')
 
 st.set_page_config(
     page_title="European Bank | Churn Intelligence",
-    page_icon="logo.png",
+    page_icon="🏦",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# ── Load logo as base64 so it always shows regardless of path ──
-def get_logo_b64():
-    for path in ["logo.png", "European_Central_Bank__Logo.png"]:
-        if os.path.exists(path):
-            with open(path, "rb") as f:
-                return base64.b64encode(f.read()).decode()
-    return None
-
-logo_b64 = get_logo_b64()
-logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height:52px;width:auto;border-radius:6px;margin-right:14px;flex-shrink:0;">' if logo_b64 else ''
 
 st.markdown(f"""
 <style>
@@ -222,10 +212,7 @@ df = load_data()
 #  SIDEBAR
 # ══════════════════════════════════════════════════════════════
 with st.sidebar:
-    if logo_b64:
-        st.markdown(f'<img src="data:image/png;base64,{logo_b64}" style="width:180px;border-radius:8px;">', unsafe_allow_html=True)
-    else:
-        st.markdown("### 🏦 ECB Analytics")
+    st.markdown("### 🏦 Churn Analytics")
     st.markdown("<hr style='border-color:#c9a84c33;margin:0.8rem 0 1rem 0'>", unsafe_allow_html=True)
     st.markdown("<span style='color:#c9a84c;font-size:0.65rem;letter-spacing:0.1em;font-weight:700'>▸ SEGMENT FILTERS</span>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
@@ -249,16 +236,14 @@ if high_value_only: filtered = filtered[filtered['HighValue'] == 1]
 if active_only:     filtered = filtered[filtered['IsActiveMember'] == 1]
 
 # ══════════════════════════════════════════════════════════════
-#  HEADER — logo embedded as base64 + full title
+#  HEADER — title and data note (no institution logo)
 # ══════════════════════════════════════════════════════════════
-st.markdown(f"""
-    <div style='display:flex;align-items:center;padding:0.5rem 0 0.3rem 0;gap:0;'>
-        {logo_html}
-        <span style='font-size:1.45rem;font-weight:700;color:#f0f6ff;letter-spacing:-0.01em;line-height:1.3;'>
-            European Bank &mdash; Churn Intelligence Dashboard
-        </span>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown(
+    "<div style='padding:0.5rem 0 0.3rem 0;font-size:1.45rem;font-weight:700;color:#f0f6ff;"
+    "letter-spacing:-0.01em;line-height:1.3;'>🏦 European Bank &mdash; Churn Intelligence Dashboard</div>"
+    "<div style='color:#8ba8c4;font-size:0.78rem;margin-top:0.2rem;'>10,000 customers in France, Germany and Spain "
+    "&middot; public sample banking dataset, not a real bank's records</div>",
+    unsafe_allow_html=True)
 st.markdown("<hr style='border-color:#c9a84c33;margin:0.4rem 0 1.2rem 0'>", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════
@@ -270,7 +255,7 @@ retained     = total - churned
 churn_rate   = (churned / total * 100) if total > 0 else 0
 hv_churn     = filtered[filtered['HighValue']==1]['Exited'].mean()*100 if filtered['HighValue'].sum()>0 else 0
 active_churn = filtered[filtered['IsActiveMember']==0]['Exited'].mean()*100 if total>0 else 0
-revenue_risk = filtered[filtered['Exited']==1]['Balance'].sum()
+churned_balances = filtered[filtered['Exited']==1]['Balance'].sum()
 
 k1,k2,k3,k4,k5,k6 = st.columns(6)
 for col,label,val,cls,delta in [
@@ -279,7 +264,7 @@ for col,label,val,cls,delta in [
     (k3,"Retention Rate",    f"{100-churn_rate:.1f}%", "good",f"✓ {retained:,} retained"),
     (k4,"High-Value Churn",  f"{hv_churn:.1f}%",       "bad", "⭐ Premium segment"),
     (k5,"Inactivity Churn",  f"{active_churn:.1f}%",   "bad", "📉 Inactive members"),
-    (k6,"Revenue at Risk",   f"${revenue_risk/1e6:.1f}M","bad","💰 Lost balance pool"),
+    (k6,"Churned Balances",  f"${churned_balances/1e6:.1f}M","bad","Held by customers who left"),
 ]:
     with col:
         st.markdown(f"""<div class="kpi-card">
@@ -433,7 +418,8 @@ with tab4:
     m2.metric("HV Churn Rate",            f"{hv['Exited'].mean()*100:.1f}%",
               delta=f"{(hv['Exited'].mean()-filtered['Exited'].mean())*100:+.1f}% vs avg")
     m3.metric("Avg Balance (HV Churned)", f"${hv[hv['Exited']==1]['Balance'].mean():,.0f}")
-    m4.metric("Total Revenue Risk",       f"${hv[hv['Exited']==1]['Balance'].sum()/1e6:.1f}M")
+    m4.metric("HV Churned Balances",      f"${hv[hv['Exited']==1]['Balance'].sum()/1e6:.1f}M")
+    st.caption("High-value (HV) = top 25% by account balance or by estimated salary. Balances are money customers held at the bank, not revenue.")
     st.markdown("<br>", unsafe_allow_html=True)
     c1,c2 = st.columns(2)
     with c1:
@@ -462,7 +448,7 @@ with tab4:
         ['Age','Geography','Gender','CreditScore','Balance','EstimatedSalary',
          'NumOfProducts','IsActiveMember','AgeGroup','CreditBand','ChurnRiskScore']
     ].sort_values('Balance',ascending=False).head(20).reset_index(drop=True)
-    st.dataframe(hvc,use_container_width=True)
+    st.dataframe(hvc,width="stretch")
 
 with tab5:
     st.markdown('<div class="sec-head">🔍 Automated Analytical Insights</div>', unsafe_allow_html=True)
@@ -490,11 +476,12 @@ with tab5:
             Active members churn at <strong>{active_r:.1f}%</strong> vs <strong>{inactive_r:.1f}%</strong> — a <strong>{inactive_r-active_r:.1f}pp</strong> gap.</div>""", unsafe_allow_html=True)
         st.markdown(f"""<div class="insight-box"><strong>✅ Gender Churn Gap</strong><br>
             Female customers churn at <strong>{female_r:.1f}%</strong> vs <strong>{male_r:.1f}%</strong> — a <strong>{female_r-male_r:.1f}pp</strong> gap.</div>""", unsafe_allow_html=True)
-        st.markdown(f"""<div class="insight-box"><strong>✅ High Balance ≠ Loyalty</strong><br>
-            High-balance customers churn at <strong>{hv_churn:.1f}%</strong> — nearly equal to the overall rate.</div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="insight-box"><strong>✅ High Value ≠ Loyalty</strong><br>
+            High-value customers churn at <strong>{hv_churn:.1f}%</strong> — close to the overall rate of <strong>{churn_rate:.1f}%</strong>.</div>""", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<div class="sec-head">Churn Risk Score Distribution</div>', unsafe_allow_html=True)
-    st.caption("Risk Score = composite of inactivity, age, product count, credit score & zero balance (0–100)")
+    st.caption("Risk Score (0–100) = inactive member (30) + age over 45 (25) + 3 or more products (25) + zero balance (10) + credit score under 500 (10). "
+               "Weights were set by hand, not fitted. On the full data, 71.6% of High Risk customers churned, against 12.6% of Low Risk.")
     high_risk = filtered[filtered['ChurnRiskScore'] >= 55]
     med_risk  = filtered[(filtered['ChurnRiskScore'] >= 30) & (filtered['ChurnRiskScore'] < 55)]
     low_risk  = filtered[filtered['ChurnRiskScore'] < 30]
@@ -533,6 +520,6 @@ with tab5:
 with tab6:
     st.markdown('<div class="sec-head">Filtered Dataset</div>', unsafe_allow_html=True)
     st.caption(f"Showing {len(filtered):,} rows · All segmentation fields included")
-    st.dataframe(filtered.reset_index(drop=True),use_container_width=True,height=460)
+    st.dataframe(filtered.reset_index(drop=True),width="stretch",height=460)
     csv = filtered.to_csv(index=False).encode('utf-8')
     st.download_button("⬇ Download Filtered CSV",csv,"filtered_bank_data.csv","text/csv")
